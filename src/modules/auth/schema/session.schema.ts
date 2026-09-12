@@ -5,27 +5,21 @@ import { Document, Types } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Session {
-    @Prop({type: Types.ObjectId, ref: 'User', required: true})
-    userId: Types.ObjectId; 
-    ///we use Types.ObjectId to reference the User model in MongoDB, ensuring that each session is associated with a specific user.
-    ///ref is used to establish a relationship between the Session and User models, allowing for population of user data when querying sessions.
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  userId: Types.ObjectId;
+  ///we use Types.ObjectId to reference the User model in MongoDB, ensuring that each session is associated with a specific user.
+  ///ref is used to establish a relationship between the Session and User models, allowing for population of user data when querying sessions.
 
-    @Prop({ type: Date, required: true })
-    expiresAt: Date;
+  @Prop({ type: Date, required: true })
+  expiresAt: Date;
 
-    @Prop({ type: String, required: true,unique: true })
-    refreshTokenHash: string;
+  @Prop({ type: String, required: true, unique: true })
+  refreshTokenHash: string;
 
-    @Prop({ type: String, required: true})
-    deviceId: string;
-
-
-
+  @Prop({ type: String, required: true })
+  deviceId: string;
 }
-
-
 
 export const SessionSchema = SchemaFactory.createForClass(Session);
 SessionSchema.index({ userId: 1, deviceId: 1 }, { unique: true });
 SessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
-
