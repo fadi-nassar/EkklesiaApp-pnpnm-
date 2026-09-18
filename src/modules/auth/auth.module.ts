@@ -35,3 +35,4 @@ import { JwtStrategy } from './strategies/jwt.strategy.js';
   exports: [AuthService, JwtStrategy, PassportModule],
 })
 export class AuthModule {}
+  
