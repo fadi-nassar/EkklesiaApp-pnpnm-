@@ -31,6 +31,9 @@ export class User {
 
   @Prop({ type: [Types.ObjectId], default: [], ref: 'Institution' })
   managedInstitutionIds: Types.ObjectId[];
+
+  @Prop({ type: String, required: true, enum: ['orthodox'] })
+  rite: string;
 }
 
 export type UserDocument = User & Document;

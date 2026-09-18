@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Document, Model } from 'mongoose';
+import { Document, Model, Types } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { User, UserDocument } from '../users/schema/user.schema.js';
 import { Session } from './schema/session.schema.js';
@@ -26,6 +26,8 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = crypto.randomBytes(32).toString('hex');
 
+    await this.sessionModel.findOneAndDelete({ userId: user._id, deviceId });
+
     const session = new this.sessionModel({
       userId: user._id,
       deviceId: deviceId,
@@ -36,13 +38,13 @@ export class AuthService {
         .digest('hex'),
     });
     await session.save();
-    return { accessToken, refreshToken };
+    return { accessToken, refreshToken, sessionId: session._id };
   }
 
   async register(
     userData: Pick<
       User,
-      'username' | 'email' | 'passwordHash' | 'homeInstitutionId' | 'role'
+      'username' | 'email' | 'passwordHash' | 'homeInstitutionId' | 'role' | 'rite'
     >,
     deviceId: string,
   ) {
@@ -106,6 +108,7 @@ export class AuthService {
     return user;
   }
   async logout(sessionId: string,userId: string ) {
-    await this.sessionModel.deleteOne({ _id: sessionId, userId });
+    const userObjectId = new Types.ObjectId(userId);
+    await this.sessionModel.deleteOne({ _id: sessionId, userId: userObjectId });
   }
 }

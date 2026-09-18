@@ -57,6 +57,20 @@ $ pnpm run test:e2e
 $ pnpm run test:cov
 ```
 
+## Seeding the database
+
+To populate a local database with sample institutions and users:
+
+```bash
+$ docker compose up -d
+$ pnpm run seed
+```
+
+The script is idempotent (safe to re-run — it skips any institution or user
+that already exists) and prints the login credentials for the seeded
+superadmin and test user accounts at the end. Copy those into Swagger's
+`POST /v1/auth/login` endpoint to authenticate.
+
 ## Deployment
 
 When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.

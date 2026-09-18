@@ -37,7 +37,8 @@ export class InstitutionsService {
       admins : [], // Default empty admins array, you can modify this as needed
       location : { type: 'Point', coordinates: [lng, lat] }, // Set the coordinates based on the town
     });
-    return createdInstitution.save();
+    await createdInstitution.save();
+    return this.institutionModel.findById(createdInstitution._id).select('-admins').exec() as Promise<Institution>;
   }
   async assignAdminToInstitution(institutionId: string, adminId: string): Promise<Institution> {
     const session = await this.institutionModel.db.startSession();

@@ -31,7 +31,7 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() dto: RegisterDto) {
-    const { username, email, password, homeInstitutionId, deviceId } = dto;
+    const { username, email, password, homeInstitutionId, deviceId, rite } = dto;
     return this.authService.register(
       {
         username,
@@ -39,6 +39,7 @@ export class AuthController {
         passwordHash: password,
         homeInstitutionId: new Types.ObjectId(homeInstitutionId),
         role: 'user',
+        rite,
       },
       deviceId,
     );
