@@ -7,6 +7,8 @@ import { DatabaseModule } from './database/database.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { InstitutionsModule } from './modules/institutions/institutions.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { SchedulesModule } from './modules/schedules/schedules.module.js';
+import { EventsModule } from './modules/events/events.module.js';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { AuthModule } from './modules/auth/auth.module.js';
     HealthModule,
     InstitutionsModule,
     AuthModule,
+    SchedulesModule,
+    EventsModule,
   ],
   providers: [
     {
