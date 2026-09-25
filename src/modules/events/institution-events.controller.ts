@@ -1,4 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { EventsService } from './events.service.js';
 import { CreateEventDto } from './dto/create-event.dto.js';
 import { UpdateEventDto } from './dto/update-event.dto.js';
@@ -40,7 +50,10 @@ export class InstitutionEventsController {
 
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Delete(':id')
-  async remove(@Param('institutionId') institutionId: string, @Param('id') id: string) {
+  async remove(
+    @Param('institutionId') institutionId: string,
+    @Param('id') id: string,
+  ) {
     await this.eventsService.remove(institutionId, id);
     return { message: 'Event deleted successfully.' };
   }

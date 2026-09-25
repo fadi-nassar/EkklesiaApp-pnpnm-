@@ -9,7 +9,11 @@ export class ScheduleException {
   @Prop({ type: Date, required: true })
   date: Date;
 
-  @Prop({ type: String, required: true, enum: ['cancel', 'override', 'special'] })
+  @Prop({
+    type: String,
+    required: true,
+    enum: ['cancel', 'override', 'special'],
+  })
   action: string;
 
   @Prop({ type: String })
@@ -21,5 +25,6 @@ export class ScheduleException {
 
 export type ScheduleExceptionDocument = ScheduleException & Document;
 
-export const ScheduleExceptionSchema = SchemaFactory.createForClass(ScheduleException);
+export const ScheduleExceptionSchema =
+  SchemaFactory.createForClass(ScheduleException);
 ScheduleExceptionSchema.index({ institutionId: 1, date: 1 }, { unique: true });

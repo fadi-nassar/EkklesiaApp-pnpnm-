@@ -84,7 +84,9 @@ async function main() {
   const skippedInstitutions: string[] = [];
 
   for (const seedInstitution of institutionsToSeed) {
-    const existing = await institutionModel.findOne({ name: seedInstitution.name });
+    const existing = await institutionModel.findOne({
+      name: seedInstitution.name,
+    });
     if (existing) {
       skippedInstitutions.push(seedInstitution.name);
       continue;

@@ -9,12 +9,9 @@ import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { JwtStrategy } from './strategies/jwt.strategy.js';
 
-
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: Session.name, schema: SessionSchema },
-    ]),
+    MongooseModule.forFeature([{ name: Session.name, schema: SessionSchema }]),
     UsersModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
@@ -35,4 +32,3 @@ import { JwtStrategy } from './strategies/jwt.strategy.js';
   exports: [AuthService, JwtStrategy, PassportModule],
 })
 export class AuthModule {}
-  

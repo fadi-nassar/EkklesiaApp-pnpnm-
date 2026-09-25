@@ -1,4 +1,10 @@
-import { IsEmail, IsIn, IsMongoId, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsIn,
+  IsMongoId,
+  IsNotEmpty,
+  IsString,
+} from 'class-validator';
 
 export class RegisterDto {
   @IsString()
@@ -18,7 +24,7 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   deviceId: string;
-  
+
   @IsString()
   @IsNotEmpty()
   @IsIn(['orthodox'])

@@ -44,7 +44,12 @@ export class AuthService {
   async register(
     userData: Pick<
       User,
-      'username' | 'email' | 'passwordHash' | 'homeInstitutionId' | 'role' | 'rite'
+      | 'username'
+      | 'email'
+      | 'passwordHash'
+      | 'homeInstitutionId'
+      | 'role'
+      | 'rite'
     >,
     deviceId: string,
   ) {
@@ -97,17 +102,20 @@ export class AuthService {
 
     return { accessToken: newAccessToken, refreshToken: newRefreshToken };
   }
-  async validateUser(email: string, password: string): Promise<UserDocument | null> {
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<UserDocument | null> {
     const user = await this.userModel.findOne({ email });
     if (!user) {
-        return null;
-        }
+      return null;
+    }
     if (!(await bcrypt.compare(password, user.passwordHash))) {
       return null;
     }
     return user;
   }
-  async logout(sessionId: string,userId: string ) {
+  async logout(sessionId: string, userId: string) {
     const userObjectId = new Types.ObjectId(userId);
     await this.sessionModel.deleteOne({ _id: sessionId, userId: userObjectId });
   }

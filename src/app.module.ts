@@ -9,6 +9,7 @@ import { InstitutionsModule } from './modules/institutions/institutions.module.j
 import { AuthModule } from './modules/auth/auth.module.js';
 import { SchedulesModule } from './modules/schedules/schedules.module.js';
 import { EventsModule } from './modules/events/events.module.js';
+import { HomeFeedModule } from './modules/home-feed/home-feed.module.js';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { EventsModule } from './modules/events/events.module.js';
     AuthModule,
     SchedulesModule,
     EventsModule,
+    HomeFeedModule
   ],
   providers: [
     {

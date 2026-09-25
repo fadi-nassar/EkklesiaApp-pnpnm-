@@ -2,7 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Event, EventDocument } from './schema/event.schema.js';
-import { Institution, InstitutionDocument } from '../institutions/schemas/institution.schema.js';
+import {
+  Institution,
+  InstitutionDocument,
+} from '../institutions/schemas/institution.schema.js';
 import { CreateEventDto } from './dto/create-event.dto.js';
 import { UpdateEventDto } from './dto/update-event.dto.js';
 
@@ -18,7 +21,9 @@ export class EventsService {
   async create(institutionId: string, dto: CreateEventDto): Promise<Event> {
     const institution = await this.institutionModel.findById(institutionId);
     if (!institution) {
-      throw new NotFoundException(`Institution with ID ${institutionId} not found.`);
+      throw new NotFoundException(
+        `Institution with ID ${institutionId} not found.`,
+      );
     }
 
     const created = new this.eventModel({
@@ -36,17 +41,23 @@ export class EventsService {
     institutionId: string,
     query: { from?: string; to?: string },
   ): Promise<Event[]> {
-    const filter: any = { institutionId };
-    if (query.from || query.to) {
-      filter.startsAt = {};
-      if (query.from) {
-        filter.startsAt.$gte = new Date(query.from);
-      }
-      if (query.to) {
-        filter.startsAt.$lte = new Date(query.to);
-      }
-    }
-    return this.eventModel.find(filter).sort({ startsAt: 1 }).exec();
+    const fromDate = query.from ? new Date(query.from) : new Date(0);
+    const toDate = query.to ? new Date(query.to) : new Date(8640000000000000);
+    return this.getUpcomingEvents(institutionId, fromDate, toDate);
+  }
+
+  async getUpcomingEvents(
+    institutionId: string,
+    fromDate: Date,
+    toDate: Date,
+  ): Promise<Event[]> {
+    return this.eventModel
+      .find({
+        institutionId,
+        startsAt: { $gte: fromDate, $lte: toDate },
+      })
+      .sort({ startsAt: 1 })
+      .exec();
   }
 
   async findOne(id: string): Promise<Event> {
@@ -57,10 +68,16 @@ export class EventsService {
     return event;
   }
 
-  async update(institutionId: string, id: string, dto: UpdateEventDto): Promise<Event> {
+  async update(
+    institutionId: string,
+    id: string,
+    dto: UpdateEventDto,
+  ): Promise<Event> {
     const event = await this.eventModel.findOne({ _id: id, institutionId });
     if (!event) {
-      throw new NotFoundException(`Event with ID ${id} not found for this institution.`);
+      throw new NotFoundException(
+        `Event with ID ${id} not found for this institution.`,
+      );
     }
 
     if (dto.title !== undefined) {
@@ -85,7 +102,10 @@ export class EventsService {
   async remove(institutionId: string, id: string): Promise<void> {
     const result = await this.eventModel.deleteOne({ _id: id, institutionId });
     if (result.deletedCount === 0) {
-      throw new NotFoundException(`Event with ID ${id} not found for this institution.`);
+      throw new NotFoundException(
+        `Event with ID ${id} not found for this institution.`,
+      );
     }
   }
+  
 }

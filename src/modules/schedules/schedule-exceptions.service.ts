@@ -1,11 +1,18 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
   ScheduleException,
   ScheduleExceptionDocument,
 } from './schema/schedule-exception.schema.js';
-import { Institution, InstitutionDocument } from '../institutions/schemas/institution.schema.js';
+import {
+  Institution,
+  InstitutionDocument,
+} from '../institutions/schemas/institution.schema.js';
 import { CreateScheduleExceptionDto } from './dto/create-schedule-exception.dto.js';
 import { UpdateScheduleExceptionDto } from './dto/update-schedule-exception.dto.js';
 
@@ -27,7 +34,9 @@ export class ScheduleExceptionsService {
   ): Promise<ScheduleException> {
     const institution = await this.institutionModel.findById(institutionId);
     if (!institution) {
-      throw new NotFoundException(`Institution with ID ${institutionId} not found.`);
+      throw new NotFoundException(
+        `Institution with ID ${institutionId} not found.`,
+      );
     }
 
     const created = new this.scheduleExceptionModel({
@@ -70,7 +79,10 @@ export class ScheduleExceptionsService {
     id: string,
     dto: UpdateScheduleExceptionDto,
   ): Promise<ScheduleException> {
-    const exception = await this.scheduleExceptionModel.findOne({ _id: id, institutionId });
+    const exception = await this.scheduleExceptionModel.findOne({
+      _id: id,
+      institutionId,
+    });
     if (!exception) {
       throw new NotFoundException(
         `Schedule exception with ID ${id} not found for this institution.`,
@@ -101,7 +113,10 @@ export class ScheduleExceptionsService {
   }
 
   async remove(institutionId: string, id: string): Promise<void> {
-    const result = await this.scheduleExceptionModel.deleteOne({ _id: id, institutionId });
+    const result = await this.scheduleExceptionModel.deleteOne({
+      _id: id,
+      institutionId,
+    });
     if (result.deletedCount === 0) {
       throw new NotFoundException(
         `Schedule exception with ID ${id} not found for this institution.`,
