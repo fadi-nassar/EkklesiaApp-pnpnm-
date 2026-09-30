@@ -10,6 +10,8 @@ import { AuthModule } from './modules/auth/auth.module.js';
 import { SchedulesModule } from './modules/schedules/schedules.module.js';
 import { EventsModule } from './modules/events/events.module.js';
 import { HomeFeedModule } from './modules/home-feed/home-feed.module.js';
+import { NewsModule } from './modules/news/news.module.js';
+import { FollowsModule } from './modules/follows/follows.module.js';
 
 @Module({
   imports: [
@@ -29,7 +31,9 @@ import { HomeFeedModule } from './modules/home-feed/home-feed.module.js';
     AuthModule,
     SchedulesModule,
     EventsModule,
-    HomeFeedModule
+    HomeFeedModule,
+    NewsModule,
+    FollowsModule,
   ],
   providers: [
     {

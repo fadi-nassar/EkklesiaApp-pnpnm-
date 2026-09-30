@@ -11,6 +11,7 @@ import {
 } from './schemas/institution.schema.js';
 import { CreateInstitutionDto } from './dto/create-institution.dto.js';
 import { User, UserDocument } from '../users/schema/user.schema.js';
+import { geocodeAddress } from './geocoding.util.js';
 
 const TOWN_COORDINATES: Record<string, { lng: number; lat: number }> = {
   Kousba: { lng: 35.8528, lat: 34.3017 },
@@ -29,12 +30,15 @@ export class InstitutionsService {
   async createInstitution(
     createInstitutionDto: CreateInstitutionDto,
   ): Promise<Institution> {
-    if (!TOWN_COORDINATES[createInstitutionDto.town]) {
-      throw new BadRequestException(
-        `Coordinates for town ${createInstitutionDto.town} not found.`,
-      );
+    let coordinates: { lat: number; lng: number } | null = null;
+    if (createInstitutionDto.address){
+      coordinates = await geocodeAddress(createInstitutionDto.address);
     }
-    const { lng, lat } = TOWN_COORDINATES[createInstitutionDto.town];
+    if (!coordinates && createInstitutionDto.town){
+      coordinates = TOWN_COORDINATES[createInstitutionDto.town] ?? null
+    }
+    if (!coordinates) {
+      throw new BadRequestException("Could not resolve a location from the provided address or town."); }
     const createdInstitution = new this.institutionModel({
       name: createInstitutionDto.name,
       type: createInstitutionDto.type,
@@ -42,13 +46,16 @@ export class InstitutionsService {
       timezone: 'Asia/Beirut', // Default timezone, you can modify this as needed
       rite: createInstitutionDto.rite,
       admins: [], // Default empty admins array, you can modify this as needed
-      location: { type: 'Point', coordinates: [lng, lat] }, // Set the coordinates based on the town
+      location: { type: 'Point', coordinates: [coordinates.lng, coordinates.lat] }, // Set the coordinates based on the town
     });
     await createdInstitution.save();
     return this.institutionModel
       .findById(createdInstitution._id)
       .select('-admins')
       .exec() as Promise<Institution>;
+
+      
+
   }
   async assignAdminToInstitution(
     institutionId: string,

@@ -29,6 +29,9 @@ export class Institution {
 
   @Prop({ type: String, required: true, enum: ['orthodox'] })
   rite: string;
+
+  @Prop({ type: Number, default: 0 })
+  followerCount: number;
 }
 
 export type InstitutionDocument = Institution & Document;

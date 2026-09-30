@@ -13,6 +13,7 @@ import { CreateInstitutionDto } from './dto/create-institution.dto.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { SuperAdminGuard } from '../../common/guards/super-admin-guard.js';
 import { AssignAdminDto } from './dto/assign-admin.dto.js';
+import { geocodeAddress } from './geocoding.util.js';
 
 @Controller('institutions')
 export class InstitutionsController {
@@ -22,6 +23,7 @@ export class InstitutionsController {
   @Post()
   async createInstitution(@Body() createInstitutionDto: CreateInstitutionDto) {
     return this.institutionsService.createInstitution(createInstitutionDto);
+    
   }
 
   //for anyone
