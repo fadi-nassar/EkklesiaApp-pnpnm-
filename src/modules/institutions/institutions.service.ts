@@ -150,4 +150,11 @@ export class InstitutionsService {
 
     return this.institutionModel.find(filter).select('-admins').exec();
   }
+
+  async deleteInstitution(id: string): Promise<void> {
+    const result = await this.institutionModel.deleteOne({ _id: id });
+    if (result.deletedCount === 0) {
+      throw new NotFoundException(`Institution with ID ${id} not found.`);
+    }
+  }
 }

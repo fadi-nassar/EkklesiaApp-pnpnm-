@@ -7,6 +7,7 @@ import {
   Post,
   UseGuards,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import { InstitutionsService } from './institutions.service.js';
 import { CreateInstitutionDto } from './dto/create-institution.dto.js';
@@ -49,5 +50,11 @@ export class InstitutionsController {
       institutionId,
       assignAdminDto.userId,
     );
+  }
+
+  @UseGuards(JwtAuthGuard, SuperAdminGuard)
+  @Delete(':id')
+  async deleteInstitution(@Param('id') id: string) {
+    return this.institutionsService.deleteInstitution(id);
   }
 }
