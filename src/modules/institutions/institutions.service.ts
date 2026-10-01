@@ -158,9 +158,37 @@ export class InstitutionsService {
   }
 
   async deleteInstitution(id: string): Promise<void> {
-    const result = await this.institutionModel.deleteOne({ _id: id });
-    if (result.deletedCount === 0) {
-      throw new NotFoundException(`Institution with ID ${id} not found.`);
+    const session = await this.institutionModel.db.startSession();
+    session.startTransaction();
+    try {
+      const institutionId = new Types.ObjectId(id);
+      const result = await this.institutionModel.deleteOne(
+        { _id: institutionId },
+        { session },
+      );
+      if (result.deletedCount === 0) {
+        throw new NotFoundException(`Institution with ID ${id} not found.`);
+      }
+
+      const affectedUsers = await this.userModel
+        .find({ managedInstitutionIds: institutionId })
+        .session(session);
+      for (const user of affectedUsers) {
+        user.managedInstitutionIds = user.managedInstitutionIds.filter(
+          (managedId) => !managedId.equals(institutionId),
+        );
+        if (user.managedInstitutionIds.length === 0) {
+          user.role = 'user';
+        }
+        await user.save({ session });
+      }
+
+      await session.commitTransaction();
+    } catch (err) {
+      await session.abortTransaction();
+      throw err;
+    } finally {
+      session.endSession();
     }
   }
 
