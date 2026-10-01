@@ -31,11 +31,15 @@ export class InstitutionsService {
     createInstitutionDto: CreateInstitutionDto,
   ): Promise<Institution> {
     let coordinates: { lat: number; lng: number } | null = null;
+    let country = '';
     if (createInstitutionDto.address){
-      coordinates = await geocodeAddress(createInstitutionDto.address);
+      const geocoded = await geocodeAddress(createInstitutionDto.address);
+      coordinates = geocoded;
+      if (geocoded) country = geocoded.country;
     }
     if (!coordinates && createInstitutionDto.town){
       coordinates = TOWN_COORDINATES[createInstitutionDto.town] ?? null
+      if (coordinates) country = 'Lebanon';
     }
     if (!coordinates) {
       throw new BadRequestException("Could not resolve a location from the provided address or town."); }
@@ -45,6 +49,7 @@ export class InstitutionsService {
       currency: 'USD', // Default currency, you can modify this as needed
       timezone: 'Asia/Beirut', // Default timezone, you can modify this as needed
       rite: createInstitutionDto.rite,
+      country,
       admins: [], // Default empty admins array, you can modify this as needed
       location: { type: 'Point', coordinates: [coordinates.lng, coordinates.lat] }, // Set the coordinates based on the town
     });
