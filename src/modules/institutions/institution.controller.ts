@@ -28,6 +28,27 @@ export class InstitutionsController {
   }
 
   //for anyone
+  // must be declared before ':id', otherwise 'nearby' is captured as an id
+  @Get('nearby')
+  async getNearbyInstitutions(
+    @Query()
+    query: {
+      lat: string;
+      lng: string;
+      maxDistance?: string;
+      rite?: string;
+      includeAllCountries?: string;
+    },
+  ) {
+    return this.institutionsService.getNearbyInstitutions(
+      Number(query.lat),
+      Number(query.lng),
+      query.maxDistance !== undefined ? Number(query.maxDistance) : undefined,
+      query.rite,
+      query.includeAllCountries === 'true',
+    );
+  }
+
   @Get(':id')
   async getInstitutionById(@Param('id') id: string) {
     return this.institutionsService.getInstitutionById(id);

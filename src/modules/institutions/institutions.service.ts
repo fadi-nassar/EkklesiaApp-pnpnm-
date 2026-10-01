@@ -12,6 +12,7 @@ import {
 import { CreateInstitutionDto } from './dto/create-institution.dto.js';
 import { User, UserDocument } from '../users/schema/user.schema.js';
 import { geocodeAddress } from './geocoding.util.js';
+import { isWithinLebanon } from './location.util.js';
 
 const TOWN_COORDINATES: Record<string, { lng: number; lat: number }> = {
   Kousba: { lng: 35.8528, lat: 34.3017 },
@@ -162,4 +163,31 @@ export class InstitutionsService {
       throw new NotFoundException(`Institution with ID ${id} not found.`);
     }
   }
+
+  async getNearbyInstitutions(
+  lat: number,
+  lng: number,
+  maxDistance: number = 10000,
+  rite?: string,
+  includeAllCountries?: boolean,
+): Promise<Institution[]> {
+  const filter: any = {
+    location: {
+      $near: {
+        $geometry: { type: 'Point', coordinates: [lng, lat] },
+        $maxDistance: maxDistance,
+      },
+    },
+    
+  };
+  if (rite){
+      filter.rite=rite;
+    }
+  if (isWithinLebanon(lat,lng)&&!includeAllCountries){
+      filter.country='Lebanon';
+    }
+ 
+
+  return await this.institutionModel.find(filter).select('-admins').exec()
+}
 }
