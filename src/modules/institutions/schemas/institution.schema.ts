@@ -33,6 +33,12 @@ export class Institution {
   @Prop({ type: String, required: true })
   country: string;
 
+  @Prop({ type: Number, required: true })
+  maxAttendance: number;
+
+  @Prop({ type: Number, default: 30 })
+  bufferMinutes: number;
+
   @Prop({ type: Number, default: 0 })
   followerCount: number;
 }

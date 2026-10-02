@@ -13,6 +13,7 @@ import { CreateInstitutionDto } from './dto/create-institution.dto.js';
 import { User, UserDocument } from '../users/schema/user.schema.js';
 import { geocodeAddress } from './geocoding.util.js';
 import { isWithinLebanon } from './location.util.js';
+import { create } from 'domain';
 
 const TOWN_COORDINATES: Record<string, { lng: number; lat: number }> = {
   Kousba: { lng: 35.8528, lat: 34.3017 },
@@ -53,6 +54,8 @@ export class InstitutionsService {
       country,
       admins: [], // Default empty admins array, you can modify this as needed
       location: { type: 'Point', coordinates: [coordinates.lng, coordinates.lat] }, // Set the coordinates based on the town
+      maxAttendance: createInstitutionDto.maxAttendance,
+      bufferMinutes: createInstitutionDto.bufferMinutes,
     });
     await createdInstitution.save();
     return this.institutionModel

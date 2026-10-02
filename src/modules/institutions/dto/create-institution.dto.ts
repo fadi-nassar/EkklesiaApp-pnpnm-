@@ -1,4 +1,12 @@
-import { IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class CreateInstitutionDto {
   @IsString()
@@ -21,4 +29,15 @@ export class CreateInstitutionDto {
   @IsNotEmpty()
   @IsIn(['orthodox'])
   rite: string;
+
+  @IsNumber()
+  @IsInt()
+  @Min(1)
+  maxAttendance: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsInt()
+  @Min(0)
+  bufferMinutes?: number;
 }
