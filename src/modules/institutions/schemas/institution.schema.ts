@@ -1,6 +1,16 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
+@Schema()
+export class Venue {
+  @Prop({ type: String, required: true })
+  name: string;
+
+  @Prop({ type: Number, required: true, min: 1 })
+  maxAttendance: number;
+}
+export const VenueSchema = SchemaFactory.createForClass(Venue);
+
 @Schema({ timestamps: true })
 export class Institution {
   @Prop({ type: String, required: true })
@@ -38,6 +48,9 @@ export class Institution {
 
   @Prop({ type: Number, default: 30 })
   bufferMinutes: number;
+
+  @Prop({ type: [VenueSchema], default: [] })
+  venues: Venue[];
 
   @Prop({ type: Number, default: 0 })
   followerCount: number;
