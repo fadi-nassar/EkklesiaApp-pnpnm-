@@ -1,9 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document, Schema as MongooseSchema, Types } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class ScheduleException {
-  @Prop({ type: Types.ObjectId, ref: 'Institution', required: true })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Institution', required: true })
   institutionId: Types.ObjectId;
 
   @Prop({ type: Date, required: true })

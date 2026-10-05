@@ -12,6 +12,7 @@ import { EventsModule } from './modules/events/events.module.js';
 import { HomeFeedModule } from './modules/home-feed/home-feed.module.js';
 import { NewsModule } from './modules/news/news.module.js';
 import { FollowsModule } from './modules/follows/follows.module.js';
+import { BookingsModule } from './modules/bookings/bookings.module.js';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { FollowsModule } from './modules/follows/follows.module.js';
     HomeFeedModule,
     NewsModule,
     FollowsModule,
+    BookingsModule,
   ],
   providers: [
     {
