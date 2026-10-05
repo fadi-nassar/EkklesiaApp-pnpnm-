@@ -3,6 +3,7 @@ import { FollowsService } from './follows.service.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { CurrentUserPayload } from '../../common/decorators/current-user.decorator.js';
+import { ParseMongoIdPipe } from '../../common/pipes/parse-mongo-id.pipe.js';
 
 @Controller()
 export class FollowsController {
@@ -12,7 +13,7 @@ export class FollowsController {
   @UseGuards(JwtAuthGuard)
   @Post('institutions/:institutionId/follow')
   async follow(
-    @Param('institutionId') institutionId: string,
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
     @CurrentUser() currentUser: CurrentUserPayload,
   ) {
     return this.followsService.follow(currentUser.userId, institutionId);
@@ -21,7 +22,7 @@ export class FollowsController {
   @UseGuards(JwtAuthGuard)
   @Delete('institutions/:institutionId/follow')
   async unfollow(
-    @Param('institutionId') institutionId: string,
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
     @CurrentUser() currentUser: CurrentUserPayload,
   ) {
     await this.followsService.unfollow(currentUser.userId, institutionId);

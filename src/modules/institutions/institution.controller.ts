@@ -15,6 +15,7 @@ import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { SuperAdminGuard } from '../../common/guards/super-admin-guard.js';
 import { AssignAdminDto } from './dto/assign-admin.dto.js';
 import { geocodeAddress } from './geocoding.util.js';
+import { ParseMongoIdPipe } from '../../common/pipes/parse-mongo-id.pipe.js';
 
 @Controller('institutions')
 export class InstitutionsController {
@@ -50,7 +51,7 @@ export class InstitutionsController {
   }
 
   @Get(':id')
-  async getInstitutionById(@Param('id') id: string) {
+  async getInstitutionById(@Param('id', ParseMongoIdPipe) id: string) {
     return this.institutionsService.getInstitutionById(id);
   }
 
@@ -64,7 +65,7 @@ export class InstitutionsController {
   @UseGuards(JwtAuthGuard, SuperAdminGuard)
   @Patch(':id/admins')
   async assignAdminToInstitution(
-    @Param('id') institutionId: string,
+    @Param('id', ParseMongoIdPipe) institutionId: string,
     @Body() assignAdminDto: AssignAdminDto,
   ) {
     return this.institutionsService.assignAdminToInstitution(
@@ -75,7 +76,7 @@ export class InstitutionsController {
 
   @UseGuards(JwtAuthGuard, SuperAdminGuard)
   @Delete(':id')
-  async deleteInstitution(@Param('id') id: string) {
+  async deleteInstitution(@Param('id', ParseMongoIdPipe) id: string) {
     return this.institutionsService.deleteInstitution(id);
   }
 }

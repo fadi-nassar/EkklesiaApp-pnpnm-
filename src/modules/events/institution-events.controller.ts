@@ -14,6 +14,7 @@ import { CreateEventDto } from './dto/create-event.dto.js';
 import { UpdateEventDto } from './dto/update-event.dto.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { AdminGuard } from '../../common/guards/admin-guard.js';
+import { ParseMongoIdPipe } from '../../common/pipes/parse-mongo-id.pipe.js';
 
 @Controller('institutions/:institutionId/events')
 export class InstitutionEventsController {
@@ -23,7 +24,7 @@ export class InstitutionEventsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Post()
   async create(
-    @Param('institutionId') institutionId: string,
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
     @Body() dto: CreateEventDto,
   ) {
     return this.eventsService.create(institutionId, dto);
@@ -32,7 +33,7 @@ export class InstitutionEventsController {
   //for anyone
   @Get()
   async findAll(
-    @Param('institutionId') institutionId: string,
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
     @Query() query: { from?: string; to?: string },
   ) {
     return this.eventsService.findAllForInstitution(institutionId, query);
@@ -41,8 +42,8 @@ export class InstitutionEventsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Patch(':id')
   async update(
-    @Param('institutionId') institutionId: string,
-    @Param('id') id: string,
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
+    @Param('id', ParseMongoIdPipe) id: string,
     @Body() dto: UpdateEventDto,
   ) {
     return this.eventsService.update(institutionId, id, dto);
@@ -51,8 +52,8 @@ export class InstitutionEventsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Delete(':id')
   async remove(
-    @Param('institutionId') institutionId: string,
-    @Param('id') id: string,
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
+    @Param('id', ParseMongoIdPipe) id: string,
   ) {
     await this.eventsService.remove(institutionId, id);
     return { message: 'Event deleted successfully.' };

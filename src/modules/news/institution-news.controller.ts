@@ -14,6 +14,7 @@ import { CreateNewsDto } from './dto/create-news.dto.js';
 import { UpdateNewsDto } from './dto/update-news.dto.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { AdminGuard } from '../../common/guards/admin-guard.js';
+import { ParseMongoIdPipe } from '../../common/pipes/parse-mongo-id.pipe.js';
 
 @Controller('institutions/:institutionId/news')
 export class InstitutionNewsController {
@@ -23,7 +24,7 @@ export class InstitutionNewsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Post()
   async create(
-    @Param('institutionId') institutionId: string,
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
     @Body() dto: CreateNewsDto,
   ) {
     return this.newsService.create(institutionId, dto);
@@ -32,7 +33,7 @@ export class InstitutionNewsController {
   //for anyone
   @Get()
   async findAll(
-    @Param('institutionId') institutionId: string,
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
     @Query() query: { from?: string; to?: string },
   ) {
     return this.newsService.findAllForInstitution(institutionId, query);
@@ -41,8 +42,8 @@ export class InstitutionNewsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Patch(':id')
   async update(
-    @Param('institutionId') institutionId: string,
-    @Param('id') id: string,
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
+    @Param('id', ParseMongoIdPipe) id: string,
     @Body() dto: UpdateNewsDto,
   ) {
     return this.newsService.update(institutionId, id, dto);
@@ -51,8 +52,8 @@ export class InstitutionNewsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Delete(':id')
   async remove(
-    @Param('institutionId') institutionId: string,
-    @Param('id') id: string,
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
+    @Param('id', ParseMongoIdPipe) id: string,
   ) {
     await this.newsService.remove(institutionId, id);
     return { message: 'News deleted successfully.' };
