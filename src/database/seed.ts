@@ -22,6 +22,7 @@ interface SeedInstitution {
   rite: string;
   currency: string;
   timezone: string;
+  maxAttendance: number;
   country: string;
   location: { type: 'Point'; coordinates: [number, number] };
 }
@@ -42,6 +43,7 @@ const institutionsToSeed: SeedInstitution[] = [
     currency: 'USD',
     timezone: 'Asia/Beirut',
     country: 'Lebanon',
+    maxAttendance: 200,
     location: { type: 'Point', coordinates: [35.8528, 34.3017] },
   },
   {
@@ -51,6 +53,7 @@ const institutionsToSeed: SeedInstitution[] = [
     currency: 'USD',
     timezone: 'Asia/Beirut',
     country: 'Lebanon',
+    maxAttendance: 200,
     location: { type: 'Point', coordinates: [35.8528, 34.3017] },
   },
 ];
@@ -101,6 +104,7 @@ async function main() {
       currency: seedInstitution.currency,
       timezone: seedInstitution.timezone,
       country: seedInstitution.country,
+      maxAttendance: seedInstitution.maxAttendance,
       admins: [],
       location: seedInstitution.location,
     });

@@ -1,10 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Schedule, ScheduleDocument } from './schema/schedule.schema.js';
+import {
+  Institution,
+  InstitutionDocument,
+} from '../institutions/schemas/institution.schema.js';
+import { CreateScheduleDto } from './dto/create-schedule.dto.js';
+import { UpdateScheduleDto } from './dto/update-schedule.dto.js';
 import { applyTimeOverride, getNextOccurenceDate } from './schedule-utils.js';
 import { ScheduleException, ScheduleExceptionDocument } from './schema/schedule-exception.schema.js';
 
+
+const DUPLICATE_SCHEDULE_MESSAGE =
+  'A schedule already exists for this institution on this day and time. Update it instead.';
 
 @Injectable()
 export class SchedulesService {
@@ -13,6 +26,8 @@ export class SchedulesService {
     private readonly scheduleModel: Model<ScheduleDocument>,
     @InjectModel(ScheduleException.name)
     private readonly scheduleExceptionModel: Model<ScheduleExceptionDocument>,
+    @InjectModel(Institution.name)
+    private readonly institutionModel: Model<InstitutionDocument>,
   ) {}
 
   async getUpcomingRawOccurrences(institutionId: string): Promise<Array<{
@@ -52,6 +67,10 @@ export class SchedulesService {
         return null
       }
      if (exception.action === 'override') {
+        // a bad row with no time must not crash the feed: ignore it
+        if (!exception.time) {
+          return occurrence
+        }
         const newDate = new Date(occurrence.occurrenceDate);
         const [hourStr, minuteStr] = exception.time!.split(':');
         newDate.setHours(Number(hourStr), Number(minuteStr));
@@ -68,13 +87,97 @@ export class SchedulesService {
       );
 }
   async getSpecialExceptions(institutionId: string, fromDate: Date, toDate: Date ): Promise<Array<{ date: Date; time: string; serviceType: string }>>{
+    // a special is stored at the start of its day, so query from the start of
+    // fromDate's day and filter on the real moment (date + time) afterwards
+    const startOfDay = new Date(fromDate);
+    startOfDay.setHours(0, 0, 0, 0);
     const exceptions= await this.scheduleExceptionModel.find({
       institutionId,
       action: 'special',
-      date: { $gte: fromDate, $lt: toDate},
+      date: { $gte: startOfDay, $lt: toDate},
     }).exec()
-    return exceptions.map(exception=>({date: exception.date, time: exception.time!, serviceType: exception.serviceType!}))
-    
+    return exceptions
+      .map(exception=>({date: applyTimeOverride(exception.date, exception.time!), time: exception.time!, serviceType: exception.serviceType!}))
+      .filter(special=>special.date.getTime() >= fromDate.getTime())
+
   }
-  
+
+  async create(institutionId: string, dto: CreateScheduleDto): Promise<Schedule> {
+    const institution = await this.institutionModel.findById(institutionId);
+    if (!institution) {
+      throw new NotFoundException(
+        `Institution with ID ${institutionId} not found.`,
+      );
+    }
+
+    const created = new this.scheduleModel({
+      institutionId,
+      dayOfWeek: dto.dayOfWeek,
+      time: dto.time,
+      serviceType: dto.serviceType,
+    });
+
+    try {
+      return await created.save();
+    } catch (error: any) {
+      if (error.code === 11000) {
+        throw new ConflictException(DUPLICATE_SCHEDULE_MESSAGE);
+      }
+      throw error;
+    }
+  }
+
+  async findAllForInstitution(institutionId: string): Promise<Schedule[]> {
+    return this.scheduleModel
+      .find({ institutionId })
+      .sort({ dayOfWeek: 1, time: 1 })
+      .exec();
+  }
+
+  async update(
+    institutionId: string,
+    id: string,
+    dto: UpdateScheduleDto,
+  ): Promise<Schedule> {
+    const schedule = await this.scheduleModel.findOne({
+      _id: id,
+      institutionId,
+    });
+    if (!schedule) {
+      throw new NotFoundException(
+        `Schedule with ID ${id} not found for this institution.`,
+      );
+    }
+
+    if (dto.dayOfWeek !== undefined) {
+      schedule.dayOfWeek = dto.dayOfWeek;
+    }
+    if (dto.time !== undefined) {
+      schedule.time = dto.time;
+    }
+    if (dto.serviceType !== undefined) {
+      schedule.serviceType = dto.serviceType;
+    }
+
+    try {
+      return await schedule.save();
+    } catch (error: any) {
+      if (error.code === 11000) {
+        throw new ConflictException(DUPLICATE_SCHEDULE_MESSAGE);
+      }
+      throw error;
+    }
+  }
+
+  async remove(institutionId: string, id: string): Promise<void> {
+    const result = await this.scheduleModel.deleteOne({
+      _id: id,
+      institutionId,
+    });
+    if (result.deletedCount === 0) {
+      throw new NotFoundException(
+        `Schedule with ID ${id} not found for this institution.`,
+      );
+    }
+  }
 }

@@ -1,7 +1,7 @@
 export function applyTimeOverride(date: Date, time: string): Date {
   const [hourStr, minuteStr] = time.split(':');
   const result = new Date(date);
-  result.setHours(Number(hourStr), Number(minuteStr));
+  result.setHours(Number(hourStr), Number(minuteStr), 0, 0);
   return result;
 }
 
@@ -15,13 +15,10 @@ export function getNextOccurenceDate(
   const ruleMinute = Number(minuteStr);
   const result = new Date(now);
   result.setDate(result.getDate() + daysUntil);
-  if (
-    daysUntil === 0 &&
-    now.getHours() >= ruleHour &&
-    now.getMinutes() >= ruleMinute
-  ) {
+  result.setHours(ruleHour, ruleMinute, 0, 0);
+  // a candidate that is not after now has already started: use next week's
+  if (result.getTime() <= now.getTime()) {
     result.setDate(result.getDate() + 7);
   }
-  result.setHours(ruleHour, ruleMinute);
   return result;
 }

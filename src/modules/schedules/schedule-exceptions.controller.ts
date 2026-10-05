@@ -14,6 +14,7 @@ import { CreateScheduleExceptionDto } from './dto/create-schedule-exception.dto.
 import { UpdateScheduleExceptionDto } from './dto/update-schedule-exception.dto.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { AdminGuard } from '../../common/guards/admin-guard.js';
+import { ParseMongoIdPipe } from '../../common/pipes/parse-mongo-id.pipe.js';
 
 @Controller('institutions/:institutionId/schedule-exceptions')
 export class ScheduleExceptionsController {
@@ -25,7 +26,7 @@ export class ScheduleExceptionsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Post()
   async create(
-    @Param('institutionId') institutionId: string,
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
     @Body() dto: CreateScheduleExceptionDto,
   ) {
     return this.scheduleExceptionsService.create(institutionId, dto);
@@ -34,7 +35,7 @@ export class ScheduleExceptionsController {
   //for anyone
   @Get()
   async findAll(
-    @Param('institutionId') institutionId: string,
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
     @Query() query: { from?: string; to?: string },
   ) {
     return this.scheduleExceptionsService.findAllForInstitution(
@@ -46,8 +47,8 @@ export class ScheduleExceptionsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Patch(':id')
   async update(
-    @Param('institutionId') institutionId: string,
-    @Param('id') id: string,
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
+    @Param('id', ParseMongoIdPipe) id: string,
     @Body() dto: UpdateScheduleExceptionDto,
   ) {
     return this.scheduleExceptionsService.update(institutionId, id, dto);
@@ -56,8 +57,8 @@ export class ScheduleExceptionsController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Delete(':id')
   async remove(
-    @Param('institutionId') institutionId: string,
-    @Param('id') id: string,
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
+    @Param('id', ParseMongoIdPipe) id: string,
   ) {
     await this.scheduleExceptionsService.remove(institutionId, id);
     return { message: 'Schedule exception deleted successfully.' };

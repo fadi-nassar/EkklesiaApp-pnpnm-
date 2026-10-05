@@ -6,37 +6,35 @@ import {
   Param,
   Patch,
   Post,
-  Query,
   UseGuards,
 } from '@nestjs/common';
-import { EventsService } from './events.service.js';
-import { CreateEventDto } from './dto/create-event.dto.js';
-import { UpdateEventDto } from './dto/update-event.dto.js';
+import { SchedulesService } from './schedules.service.js';
+import { CreateScheduleDto } from './dto/create-schedule.dto.js';
+import { UpdateScheduleDto } from './dto/update-schedule.dto.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { AdminGuard } from '../../common/guards/admin-guard.js';
 import { ParseMongoIdPipe } from '../../common/pipes/parse-mongo-id.pipe.js';
 
-@Controller('institutions/:institutionId/events')
-export class InstitutionEventsController {
-  constructor(private readonly eventsService: EventsService) {}
+@Controller('institutions/:institutionId/schedules')
+export class SchedulesController {
+  constructor(private readonly schedulesService: SchedulesService) {}
 
   //for superAdmin or the institution's own churchAdmin
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Post()
   async create(
     @Param('institutionId', ParseMongoIdPipe) institutionId: string,
-    @Body() dto: CreateEventDto,
+    @Body() dto: CreateScheduleDto,
   ) {
-    return this.eventsService.create(institutionId, dto);
+    return this.schedulesService.create(institutionId, dto);
   }
 
   //for anyone
   @Get()
   async findAll(
     @Param('institutionId', ParseMongoIdPipe) institutionId: string,
-    @Query() query: { from?: string; to?: string },
   ) {
-    return this.eventsService.findAllForInstitution(institutionId, query);
+    return this.schedulesService.findAllForInstitution(institutionId);
   }
 
   @UseGuards(JwtAuthGuard, AdminGuard)
@@ -44,9 +42,9 @@ export class InstitutionEventsController {
   async update(
     @Param('institutionId', ParseMongoIdPipe) institutionId: string,
     @Param('id', ParseMongoIdPipe) id: string,
-    @Body() dto: UpdateEventDto,
+    @Body() dto: UpdateScheduleDto,
   ) {
-    return this.eventsService.update(institutionId, id, dto);
+    return this.schedulesService.update(institutionId, id, dto);
   }
 
   @UseGuards(JwtAuthGuard, AdminGuard)
@@ -55,7 +53,7 @@ export class InstitutionEventsController {
     @Param('institutionId', ParseMongoIdPipe) institutionId: string,
     @Param('id', ParseMongoIdPipe) id: string,
   ) {
-    await this.eventsService.remove(institutionId, id);
-    return { message: 'Event deleted successfully.' };
+    await this.schedulesService.remove(institutionId, id);
+    return { message: 'Schedule deleted successfully.' };
   }
 }
