@@ -67,6 +67,10 @@ export class SchedulesService {
         return null
       }
      if (exception.action === 'override') {
+        // a bad row with no time must not crash the feed: ignore it
+        if (!exception.time) {
+          return occurrence
+        }
         const newDate = new Date(occurrence.occurrenceDate);
         const [hourStr, minuteStr] = exception.time!.split(':');
         newDate.setHours(Number(hourStr), Number(minuteStr));
@@ -83,12 +87,18 @@ export class SchedulesService {
       );
 }
   async getSpecialExceptions(institutionId: string, fromDate: Date, toDate: Date ): Promise<Array<{ date: Date; time: string; serviceType: string }>>{
+    // a special is stored at the start of its day, so query from the start of
+    // fromDate's day and filter on the real moment (date + time) afterwards
+    const startOfDay = new Date(fromDate);
+    startOfDay.setHours(0, 0, 0, 0);
     const exceptions= await this.scheduleExceptionModel.find({
       institutionId,
       action: 'special',
-      date: { $gte: fromDate, $lt: toDate},
+      date: { $gte: startOfDay, $lt: toDate},
     }).exec()
-    return exceptions.map(exception=>({date: exception.date, time: exception.time!, serviceType: exception.serviceType!}))
+    return exceptions
+      .map(exception=>({date: applyTimeOverride(exception.date, exception.time!), time: exception.time!, serviceType: exception.serviceType!}))
+      .filter(special=>special.date.getTime() >= fromDate.getTime())
 
   }
 

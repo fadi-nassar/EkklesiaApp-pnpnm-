@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -100,6 +101,21 @@ export class ScheduleExceptionsService {
     }
     if (dto.serviceType !== undefined) {
       exception.serviceType = dto.serviceType;
+    }
+
+    // the DTO only sees the fields that were sent, so check the final row
+    if (
+      (exception.action === 'override' || exception.action === 'special') &&
+      !exception.time
+    ) {
+      throw new BadRequestException(
+        `An exception with action ${exception.action} needs a time.`,
+      );
+    }
+    if (exception.action === 'special' && !exception.serviceType) {
+      throw new BadRequestException(
+        'An exception with action special needs a serviceType.',
+      );
     }
 
     try {
