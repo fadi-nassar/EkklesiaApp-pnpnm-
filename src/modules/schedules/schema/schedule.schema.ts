@@ -1,0 +1,35 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Schema as MongooseSchema, Types } from 'mongoose';
+
+@Schema({ timestamps: true })
+export class Schedule {
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    required: true,
+    ref: 'Institution',
+  })
+  institutionId: Types.ObjectId;
+
+  @Prop({ required: true })
+  dayOfWeek: number;
+
+  @Prop({ required: true })
+  time: string;
+
+  @Prop({ required: true, enum: ['mass', 'regular_prayer'] })
+  serviceType: string;
+
+  @Prop({})
+  startDate: Date;
+
+  @Prop({})
+  endDate: Date;
+}
+
+export type ScheduleDocument = Schedule & Document;
+
+export const ScheduleSchema = SchemaFactory.createForClass(Schedule);
+ScheduleSchema.index(
+  { institutionId: 1, dayOfWeek: 1, time: 1 },
+  { unique: true },
+);

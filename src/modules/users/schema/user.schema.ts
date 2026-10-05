@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document, Schema as MongooseSchema, Types } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class User {
@@ -19,7 +19,7 @@ export class User {
   @Prop({ type: String, required: true })
   passwordHash: string;
 
-  @Prop({ type: Types.ObjectId, required: true, ref: 'Institution' })
+  @Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'Institution' })
   homeInstitutionId: Types.ObjectId;
 
   @Prop({
@@ -29,7 +29,7 @@ export class User {
   })
   role: string;
 
-  @Prop({ type: [Types.ObjectId], default: [], ref: 'Institution' })
+  @Prop({ type: [MongooseSchema.Types.ObjectId], default: [], ref: 'Institution' })
   managedInstitutionIds: Types.ObjectId[];
 
   @Prop({ type: String, required: true, enum: ['orthodox'] })
@@ -39,4 +39,3 @@ export class User {
 export type UserDocument = User & Document;
 
 export const UserSchema = SchemaFactory.createForClass(User);
-

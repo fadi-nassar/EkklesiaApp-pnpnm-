@@ -1,4 +1,12 @@
-import { IsIn, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class CreateInstitutionDto {
   @IsString()
@@ -9,12 +17,27 @@ export class CreateInstitutionDto {
   @IsIn(['church', 'monastery'])
   type: string;
 
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  town: string;
+  town?: string;
+
+  @IsOptional()
+  @IsString()
+  address?: string;
 
   @IsString()
   @IsNotEmpty()
   @IsIn(['orthodox'])
   rite: string;
+
+  @IsNumber()
+  @IsInt()
+  @Min(1)
+  maxAttendance: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsInt()
+  @Min(0)
+  bufferMinutes?: number;
 }

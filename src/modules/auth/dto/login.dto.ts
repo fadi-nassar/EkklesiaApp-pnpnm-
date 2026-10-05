@@ -11,4 +11,6 @@ export class LoginDto {
   @IsString()
   @IsNotEmpty()
   deviceId: string;
+  
+  
 }
