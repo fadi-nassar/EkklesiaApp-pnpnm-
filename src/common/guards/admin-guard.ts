@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   CanActivate,
   ExecutionContext,
   Injectable,
@@ -23,13 +24,15 @@ export class AdminGuard implements CanActivate {
     if (request.user && request.user.role === 'superAdmin') {
       return true;
     } else if (request.user && request.user.role === 'churchAdmin') {
-      const institutionIdFromRequest =
-        request.body.institutionId || request.params.institutionId;
+      const institutionIdFromRequest = request.params.institutionId;
 
       if (!institutionIdFromRequest) {
         throw new ForbiddenException(
           'Institution ID is required for churchAdmin users.',
         );
+      }
+      if (!/^[0-9a-fA-F]{24}$/.test(institutionIdFromRequest)) {
+        throw new BadRequestException('Invalid id');
       }
 
       const institution = await this.institutionModel
@@ -45,7 +48,7 @@ export class AdminGuard implements CanActivate {
       ) {
         return true;
       }
-    }
+     }
 
     return false; // placeholder
   }
