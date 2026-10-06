@@ -11,6 +11,8 @@ import { LoginDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { RefreshTokenDto } from './dto/refresh-token.dto.js';
 import { LogoutDto } from './dto/logout.dto.js';
+import { Throttle } from '@nestjs/throttler';
+import { ChangePasswordDto } from './dto/change-password.dto.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { CurrentUser } from '../../common/decorators/current-user.decorator.js';
 import type { CurrentUserPayload } from '../../common/decorators/current-user.decorator.js';
@@ -58,5 +60,19 @@ export class AuthController {
     @CurrentUser() currentUser: CurrentUserPayload,
   ) {
     return this.authService.logout(dto.sessionId, currentUser.userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('change-password')
+  async changePassword(
+    @Body() dto: ChangePasswordDto,
+    @CurrentUser() currentUser: CurrentUserPayload,
+  ) {
+    return this.authService.changePassword(
+      currentUser.userId,
+      dto.currentPassword,
+      dto.newPassword,
+    );
   }
 }

@@ -8,6 +8,8 @@ import {
 } from '../institutions/schemas/institution.schema.js';
 import { CreateEventDto } from './dto/create-event.dto.js';
 import { UpdateEventDto } from './dto/update-event.dto.js';
+import { SearchEventsDto } from './dto/search-events.dto.js';
+import { escapeRegex } from '../../common/utils/escape-regex.js';
 
 @Injectable()
 export class EventsService {
@@ -107,5 +109,37 @@ export class EventsService {
       );
     }
   }
-  
+
+  async search(query: SearchEventsDto): Promise<{
+    items: Event[];
+    page: number;
+    limit: number;
+    total: number;
+  }> {
+    const startsAt: any = {
+      $gte: query.from ? new Date(query.from) : new Date(),
+    };
+    if (query.to) {
+      startsAt.$lte = new Date(query.to);
+    }
+    const filter: any = { startsAt };
+    if (query.institutionId) {
+      filter.institutionId = query.institutionId;
+    }
+    if (query.search) {
+      filter.title = { $regex: escapeRegex(query.search), $options: 'i' };
+    }
+    const [items, total] = await Promise.all([
+      this.eventModel
+        .find(filter)
+        .sort({ startsAt: 1 })
+        .skip((query.page - 1) * query.limit)
+        .limit(query.limit)
+        .populate('institutionId', 'name')
+        .exec(),
+      // every match, ignoring paging
+      this.eventModel.countDocuments(filter),
+    ]);
+    return { items, page: query.page, limit: query.limit, total };
+  }
 }

@@ -52,6 +52,21 @@ export class Institution {
   @Prop({ type: [SalonSchema], default: [] })
   salons: Salon[];
 
+  @Prop({ type: String })
+  phone?: string;
+
+  @Prop({ type: String })
+  instagramUrl?: string;
+
+  @Prop({ type: String })
+  facebookUrl?: string;
+
+  @Prop({ type: String })
+  mapsUrl?: string;
+
+  @Prop({ type: String })
+  coverImage?: string;
+
   @Prop({ type: Number, default: 0 })
   followerCount: number;
 }

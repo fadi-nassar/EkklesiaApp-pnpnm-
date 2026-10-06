@@ -13,6 +13,9 @@ import { HomeFeedModule } from './modules/home-feed/home-feed.module.js';
 import { NewsModule } from './modules/news/news.module.js';
 import { FollowsModule } from './modules/follows/follows.module.js';
 import { BookingsModule } from './modules/bookings/bookings.module.js';
+import { QuotesModule } from './modules/quotes/quotes.module.js';
+import { BooksModule } from './modules/books/books.module.js';
+import { ProfileModule } from './modules/profile/profile.module.js';
 
 @Module({
   imports: [
@@ -36,6 +39,9 @@ import { BookingsModule } from './modules/bookings/bookings.module.js';
     NewsModule,
     FollowsModule,
     BookingsModule,
+    QuotesModule,
+    BooksModule,
+    ProfileModule,
   ],
   providers: [
     {

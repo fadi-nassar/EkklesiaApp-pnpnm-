@@ -13,6 +13,8 @@ import { InstitutionsService } from './institutions.service.js';
 import { CreateInstitutionDto } from './dto/create-institution.dto.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { SuperAdminGuard } from '../../common/guards/super-admin-guard.js';
+import { AdminGuard } from '../../common/guards/admin-guard.js';
+import { UpdateInstitutionDto } from './dto/update-institution.dto.js';
 import { AssignAdminDto } from './dto/assign-admin.dto.js';
 import { geocodeAddress } from './geocoding.util.js';
 import { ParseMongoIdPipe } from '../../common/pipes/parse-mongo-id.pipe.js';
@@ -60,6 +62,17 @@ export class InstitutionsController {
     @Query() query: { name?: string; type?: string; rite?: string },
   ) {
     return this.institutionsService.getAllInstitutionsByNameTypeRite(query);
+  }
+
+  //for superAdmin or the institution's own churchAdmin
+  // the param must be called institutionId: AdminGuard reads request.params.institutionId
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Patch(':institutionId')
+  async updateInstitution(
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
+    @Body() dto: UpdateInstitutionDto,
+  ) {
+    return this.institutionsService.updateInstitution(institutionId, dto);
   }
 
   @UseGuards(JwtAuthGuard, SuperAdminGuard)
