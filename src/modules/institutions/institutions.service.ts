@@ -13,6 +13,7 @@ import { CreateInstitutionDto } from './dto/create-institution.dto.js';
 import { User, UserDocument } from '../users/schema/user.schema.js';
 import { geocodeAddress } from './geocoding.util.js';
 import { isWithinLebanon } from './location.util.js';
+import { escapeRegex } from '../../common/utils/escape-regex.js';
 import { create } from 'domain';
 
 const TOWN_COORDINATES: Record<string, { lng: number; lat: number }> = {
@@ -148,7 +149,7 @@ export class InstitutionsService {
   }): Promise<Institution[]> {
     const filter: any = {};
     if (query.name) {
-      filter.name = { $regex: query.name, $options: 'i' };
+      filter.name = { $regex: escapeRegex(query.name), $options: 'i' };
     }
     if (query.type) {
       filter.type = query.type;
