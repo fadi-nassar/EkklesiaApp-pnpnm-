@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   UnauthorizedException,
@@ -118,5 +119,32 @@ export class AuthService {
   async logout(sessionId: string, userId: string) {
     const userObjectId = new Types.ObjectId(userId);
     await this.sessionModel.deleteOne({ _id: sessionId, userId: userObjectId });
+  }
+
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    // 400, not 401: a 401 would make the app try to refresh and log the user out
+    if (!(await bcrypt.compare(currentPassword, user.passwordHash))) {
+      throw new BadRequestException('Current password is incorrect');
+    }
+    if (currentPassword === newPassword) {
+      throw new BadRequestException(
+        'New password must be different from the current password',
+      );
+    }
+
+    user.passwordHash = await bcrypt.hash(newPassword, 12);
+    await user.save();
+
+    // revoke every refresh token, so a stolen session cannot outlive the change
+    await this.sessionModel.deleteMany({ userId: user._id });
+    return { message: 'Password changed. Please log in again.' };
   }
 }
