@@ -14,6 +14,7 @@ import { User, UserDocument } from '../users/schema/user.schema.js';
 import { geocodeAddress } from './geocoding.util.js';
 import { isWithinLebanon } from './location.util.js';
 import { escapeRegex } from '../../common/utils/escape-regex.js';
+import { UpdateInstitutionDto } from './dto/update-institution.dto.js';
 import { create } from 'domain';
 
 const TOWN_COORDINATES: Record<string, { lng: number; lat: number }> = {
@@ -222,4 +223,29 @@ export class InstitutionsService {
 
   return await this.institutionModel.find(filter).select('-admins').exec()
 }
+
+  async updateInstitution(
+    institutionId: string,
+    dto: UpdateInstitutionDto,
+  ): Promise<Institution> {
+    const institution = await this.institutionModel.findById(institutionId);
+    if (!institution) {
+      throw new NotFoundException(
+        `Institution with ID ${institutionId} not found.`,
+      );
+    }
+
+    // a DTO instance has every optional field as an own `undefined` property,
+    // so only copy the fields that were actually sent
+    const changes = Object.fromEntries(
+      Object.entries(dto).filter(([, value]) => value !== undefined),
+    );
+    Object.assign(institution, changes);
+    await institution.save();
+
+    return this.institutionModel
+      .findById(institutionId)
+      .select('-admins')
+      .exec() as Promise<Institution>;
+  }
 }

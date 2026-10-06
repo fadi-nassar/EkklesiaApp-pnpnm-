@@ -1,0 +1,7 @@
+[
+  { "code": "PSA", "book": "المزامير", "chapters": [23, 27, 34, 46, 91, 100, 103, 121, 130, 139, 145] },
+  { "code": "PRO", "book": "الأمثال", "chapters": [3, 31] },
+  { "code": "MAT", "book": "متى", "chapters": [5, 6, 7, 11] },
+  { "code": "LUK", "book": "لوقا", "chapters": [15] },
+  { "code": "JHN", "book": "يوحنا", "chapters": [1, 3, 10, 14, 15] }
+]

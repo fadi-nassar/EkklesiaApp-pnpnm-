@@ -4,6 +4,8 @@ import {
   IsMongoId,
   IsNotEmpty,
   IsString,
+  MaxLength,
+  MinLength,
 } from 'class-validator';
 
 export class RegisterDto {
@@ -16,6 +18,8 @@ export class RegisterDto {
 
   @IsString()
   @IsNotEmpty()
+  @MinLength(8)
+  @MaxLength(72)
   password: string;
 
   @IsMongoId()

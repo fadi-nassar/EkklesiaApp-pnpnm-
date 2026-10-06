@@ -110,7 +110,12 @@ export class EventsService {
     }
   }
 
-  async search(query: SearchEventsDto): Promise<Event[]> {
+  async search(query: SearchEventsDto): Promise<{
+    items: Event[];
+    page: number;
+    limit: number;
+    total: number;
+  }> {
     const startsAt: any = {
       $gte: query.from ? new Date(query.from) : new Date(),
     };
@@ -124,12 +129,17 @@ export class EventsService {
     if (query.search) {
       filter.title = { $regex: escapeRegex(query.search), $options: 'i' };
     }
-    return this.eventModel
-      .find(filter)
-      .sort({ startsAt: 1 })
-      .skip((query.page - 1) * query.limit)
-      .limit(query.limit)
-      .populate('institutionId', 'name')
-      .exec();
+    const [items, total] = await Promise.all([
+      this.eventModel
+        .find(filter)
+        .sort({ startsAt: 1 })
+        .skip((query.page - 1) * query.limit)
+        .limit(query.limit)
+        .populate('institutionId', 'name')
+        .exec(),
+      // every match, ignoring paging
+      this.eventModel.countDocuments(filter),
+    ]);
+    return { items, page: query.page, limit: query.limit, total };
   }
 }
