@@ -16,6 +16,7 @@ import { BookingsModule } from './modules/bookings/bookings.module.js';
 import { QuotesModule } from './modules/quotes/quotes.module.js';
 import { BooksModule } from './modules/books/books.module.js';
 import { ProfileModule } from './modules/profile/profile.module.js';
+import { NotificationsModule } from './modules/notifications/notifications.module.js';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { ProfileModule } from './modules/profile/profile.module.js';
     QuotesModule,
     BooksModule,
     ProfileModule,
+    NotificationsModule,
   ],
   providers: [
     {

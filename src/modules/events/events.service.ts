@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Event, EventDocument } from './schema/event.schema.js';
@@ -10,14 +10,20 @@ import { CreateEventDto } from './dto/create-event.dto.js';
 import { UpdateEventDto } from './dto/update-event.dto.js';
 import { SearchEventsDto } from './dto/search-events.dto.js';
 import { escapeRegex } from '../../common/utils/escape-regex.js';
+import { FollowsService } from '../follows/follows.service.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 
 @Injectable()
 export class EventsService {
+  private readonly logger = new Logger(EventsService.name);
+
   constructor(
     @InjectModel(Event.name)
     private readonly eventModel: Model<EventDocument>,
     @InjectModel(Institution.name)
     private readonly institutionModel: Model<InstitutionDocument>,
+    private readonly followsService: FollowsService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async create(institutionId: string, dto: CreateEventDto): Promise<Event> {
@@ -36,7 +42,24 @@ export class EventsService {
       startsAt: dto.startsAt,
       endsAt: dto.endsAt,
     });
-    return created.save();
+    const saved = await created.save();
+
+    try {
+      const followerIds = await this.followsService.getFollowerIds(institutionId);
+      await this.notificationsService.createMany(followerIds, {
+        type: 'event_created',
+        title: `New event: ${saved.title}`,
+        body: `${institution.name} just posted a new event: ${saved.title}.`,
+        refId: (saved as any)._id.toString(),
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to notify followers of new event ${(saved as any)._id}`,
+        error as Error,
+      );
+    }
+
+    return saved;
   }
 
   async findAllForInstitution(

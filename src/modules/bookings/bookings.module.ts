@@ -9,6 +9,7 @@ import { BookingsService } from './bookings.service.js';
 import { BookingsController } from './bookings.controller.js';
 import { AdminGuard } from '../../common/guards/admin-guard.js';
 import { AuthModule } from '../auth/auth.module.js';
+import { NotificationsModule } from '../notifications/notifications.module.js';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AuthModule } from '../auth/auth.module.js';
       { name: Institution.name, schema: InstitutionSchema },
     ]),
     AuthModule,
+    NotificationsModule,
   ],
   exports: [MongooseModule, BookingsService],
   providers: [AdminGuard, BookingsService],

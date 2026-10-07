@@ -10,6 +10,8 @@ import { EventsController } from './events.controller.js';
 import { InstitutionEventsController } from './institution-events.controller.js';
 import { AdminGuard } from '../../common/guards/admin-guard.js';
 import { AuthModule } from '../auth/auth.module.js';
+import { FollowsModule } from '../follows/follows.module.js';
+import { NotificationsModule } from '../notifications/notifications.module.js';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { AuthModule } from '../auth/auth.module.js';
       { name: Institution.name, schema: InstitutionSchema },
     ]),
     AuthModule,
+    FollowsModule,
+    NotificationsModule,
   ],
   exports: [MongooseModule, EventsService],
   providers: [AdminGuard, EventsService],

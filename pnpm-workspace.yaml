@@ -3,6 +3,7 @@ allowBuilds:
   '@scarf/scarf': false
   esbuild: true
   mongodb-memory-server: true
+  msgpackr-extract: false
   unrs-resolver: true
 
 overrides:

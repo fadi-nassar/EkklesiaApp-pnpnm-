@@ -60,6 +60,11 @@ export class FollowsService {
     });
   }
 
+  async getFollowerIds(institutionId: string): Promise<string[]> {
+    const follows = await this.followModel.find({ institutionId }).select('userId').exec();
+    return follows.map((follow) => follow.userId.toString());
+  }
+
   async getFollowedInstitutions(userId: string): Promise<Institution[]> {
     const follows = await this.followModel
       .find({ userId })

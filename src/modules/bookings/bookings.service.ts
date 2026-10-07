@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -13,16 +14,36 @@ import {
 } from '../institutions/schemas/institution.schema.js';
 import { CreateBookingDto } from './dto/create-booking.dto.js';
 import { CreateFuneralBookingDto } from './dto/create-funeral-booking.dto.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 
 
 @Injectable()
 export class BookingsService {
+  private readonly logger = new Logger(BookingsService.name);
+
   constructor(
     @InjectModel(Booking.name)
     private readonly bookingModel: Model<BookingDocument>,
     @InjectModel(Institution.name)
     private readonly institutionModel: Model<InstitutionDocument>,
+    private readonly notificationsService: NotificationsService,
   ) {}
+
+  private async notifyBookingStatus(booking: Booking, title: string, body: string): Promise<void> {
+    try {
+      await this.notificationsService.createMany([booking.userId.toString()], {
+        type: 'booking_status',
+        title,
+        body,
+        refId: (booking as any)._id.toString(),
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to notify booking status for booking ${(booking as any)._id}`,
+        error as Error,
+      );
+    }
+  }
 
   async createFuneral(
     userId: string,
@@ -104,7 +125,13 @@ export class BookingsService {
       throw new ConflictException('Booking conflicts with existing booking');
     }
     booking.status = 'approved';
-    return booking.save();
+    const saved = await booking.save();
+    await this.notifyBookingStatus(
+      saved,
+      'Booking approved',
+      `Your ${saved.bookingType} booking has been approved.`,
+    );
+    return saved;
   }
 
   async reject(institutionId: string, bookingId: string): Promise<Booking> {
@@ -123,7 +150,13 @@ export class BookingsService {
       );
     }
     booking.status = 'rejected';
-    return booking.save();
+    const saved = await booking.save();
+    await this.notifyBookingStatus(
+      saved,
+      'Booking rejected',
+      `Your ${saved.bookingType} booking has been rejected.`,
+    );
+    return saved;
   }
 
   async adminCancel(institutionId: string, bookingId: string): Promise<Booking> {
@@ -142,7 +175,13 @@ export class BookingsService {
       );
     }
     booking.status = 'cancelled';
-    return booking.save();
+    const saved = await booking.save();
+    await this.notifyBookingStatus(
+      saved,
+      'Booking cancelled',
+      `Your ${saved.bookingType} booking has been cancelled by the institution.`,
+    );
+    return saved;
   }
 
   async cancel(userId: string, bookingId: string): Promise<Booking> {
