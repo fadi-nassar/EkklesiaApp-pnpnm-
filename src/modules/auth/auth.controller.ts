@@ -21,6 +21,7 @@ import type { CurrentUserPayload } from '../../common/decorators/current-user.de
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('login')
   async login(@Body() dto: LoginDto) {
     const { email, password, deviceId } = dto;
@@ -31,6 +32,7 @@ export class AuthController {
     return this.authService.login(user, deviceId);
   }
 
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('register')
   async register(@Body() dto: RegisterDto) {
     const { username, email, password, homeInstitutionId, deviceId, rite } =
@@ -48,12 +50,14 @@ export class AuthController {
     );
   }
 
+  @Throttle({ default: { limit: 20, ttl: 60000 } })
   @Post('refresh-token')
   async refreshToken(@Body() dto: RefreshTokenDto) {
     return this.authService.refreshToken(dto.refreshToken);
   }
 
   @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 20, ttl: 60000 } })
   @Post('logout')
   async logout(
     @Body() dto: LogoutDto,
