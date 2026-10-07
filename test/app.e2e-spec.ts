@@ -1,30 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
+import { TEST_BASE_URL } from './setup/server-config.js';
 
+// Talks to the real server process booted in global-setup.ts rather than
+// building a Nest TestingModule in-process: @nestjs/testing (and the rest of
+// @nestjs/*) are ESM-only packages that Jest's CommonJS runtime cannot
+// require() in this project's current toolchain (ts-jest/Jest 30, no
+// package.json "type": "module"). See global-setup.ts for the full reasoning.
 describe('HealthController (e2e)', () => {
-  let app: INestApplication<App>;
-
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
-  });
-
-  it('/health (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/health')
-      .expect((res) => {
-        expect([200, 503]).toContain(res.status);
-      });
-  });
-
-  afterEach(async () => {
-    await app.close();
+  it('/health (GET)', async () => {
+    const res = await request(TEST_BASE_URL).get('/health');
+    expect([200, 503]).toContain(res.status);
   });
 });
