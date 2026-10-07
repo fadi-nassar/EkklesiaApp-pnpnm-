@@ -1,13 +1,17 @@
 import { Type } from 'class-transformer';
-import { IsIn, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsIn, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 
 export class NearbyInstitutionsDto {
   @Type(() => Number)
   @IsNumber()
+  @Min(-90)
+  @Max(90)
   lat: number;
 
   @Type(() => Number)
   @IsNumber()
+  @Min(-180)
+  @Max(180)
   lng: number;
 
   @IsOptional()

@@ -17,10 +17,20 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
+    // a non-Nest error (e.g. body-parser's PayloadTooLargeError) still carries a
+    // real HTTP status via `status`/`statusCode`; honor it instead of flattening
+    // every non-HttpException into a 500
+    const rawStatus = (exception as { status?: unknown; statusCode?: unknown })
+      ?.status ?? (exception as { statusCode?: unknown })?.statusCode;
+    const isClientError =
+      typeof rawStatus === 'number' && rawStatus >= 400 && rawStatus < 500;
+
     const status =
       exception instanceof HttpException
         ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
+        : isClientError
+          ? rawStatus
+          : HttpStatus.INTERNAL_SERVER_ERROR;
 
     const exceptionResponse =
       exception instanceof HttpException ? exception.getResponse() : null;
@@ -31,7 +41,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
           exceptionResponse)
         : exception instanceof HttpException
           ? exception.message
-          : 'Internal server error';
+          : isClientError
+            ? 'Bad request'
+            : 'Internal server error';
 
     if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
       this.logger.error(
