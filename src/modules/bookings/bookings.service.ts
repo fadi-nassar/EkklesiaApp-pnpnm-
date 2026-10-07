@@ -126,6 +126,25 @@ export class BookingsService {
     return booking.save();
   }
 
+  async adminCancel(institutionId: string, bookingId: string): Promise<Booking> {
+    const booking = await this.bookingModel
+      .findOne({
+        _id: new Types.ObjectId(bookingId),
+        institutionId: new Types.ObjectId(institutionId),
+      })
+      .exec();
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
+    }
+    if (booking.status !== 'requested' && booking.status !== 'approved') {
+      throw new ConflictException(
+        `A booking that is ${booking.status} cannot be cancelled`,
+      );
+    }
+    booking.status = 'cancelled';
+    return booking.save();
+  }
+
   async cancel(userId: string, bookingId: string): Promise<Booking> {
     // matching on userId is the ownership check
     const booking = await this.bookingModel
@@ -206,6 +225,9 @@ export class BookingsService {
     const endsAt = new Date(dto.endsAt);
     if (startsAt >= endsAt) {
       throw new BadRequestException('Start time must be before end time');
+    }
+    if (startsAt < new Date()) {
+      throw new BadRequestException('Start time cannot be in the past');
     }
     let capacity = institution.maxAttendance;
     if (dto.salonId) {

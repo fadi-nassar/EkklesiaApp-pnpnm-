@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
   IsIn,
   IsInt,
@@ -9,6 +10,7 @@ import {
 } from 'class-validator';
 
 export class CreateInstitutionDto {
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
   @IsNotEmpty()
   name: string;

@@ -11,6 +11,18 @@ import {
 } from './schemas/institution.schema.js';
 import { CreateInstitutionDto } from './dto/create-institution.dto.js';
 import { User, UserDocument } from '../users/schema/user.schema.js';
+import { Booking, BookingDocument } from '../bookings/schema/booking.schema.js';
+import { Event, EventDocument } from '../events/schema/event.schema.js';
+import { News, NewsDocument } from '../news/schema/news.schema.js';
+import { Follow, FollowDocument } from '../follows/schema/follow.schema.js';
+import {
+  Schedule,
+  ScheduleDocument,
+} from '../schedules/schema/schedule.schema.js';
+import {
+  ScheduleException,
+  ScheduleExceptionDocument,
+} from '../schedules/schema/schedule-exception.schema.js';
 import { geocodeAddress } from './geocoding.util.js';
 import { isWithinLebanon } from './location.util.js';
 import { escapeRegex } from '../../common/utils/escape-regex.js';
@@ -28,6 +40,18 @@ export class InstitutionsService {
     private readonly institutionModel: Model<InstitutionDocument>,
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
+    @InjectModel(Booking.name)
+    private readonly bookingModel: Model<BookingDocument>,
+    @InjectModel(Event.name)
+    private readonly eventModel: Model<EventDocument>,
+    @InjectModel(News.name)
+    private readonly newsModel: Model<NewsDocument>,
+    @InjectModel(Follow.name)
+    private readonly followModel: Model<FollowDocument>,
+    @InjectModel(Schedule.name)
+    private readonly scheduleModel: Model<ScheduleDocument>,
+    @InjectModel(ScheduleException.name)
+    private readonly scheduleExceptionModel: Model<ScheduleExceptionDocument>,
   ) {}
 
   //for super admin only
@@ -174,6 +198,16 @@ export class InstitutionsService {
       if (result.deletedCount === 0) {
         throw new NotFoundException(`Institution with ID ${id} not found.`);
       }
+
+      await this.eventModel.deleteMany({ institutionId }, { session });
+      await this.newsModel.deleteMany({ institutionId }, { session });
+      await this.bookingModel.deleteMany({ institutionId }, { session });
+      await this.followModel.deleteMany({ institutionId }, { session });
+      await this.scheduleModel.deleteMany({ institutionId }, { session });
+      await this.scheduleExceptionModel.deleteMany(
+        { institutionId },
+        { session },
+      );
 
       const affectedUsers = await this.userModel
         .find({ managedInstitutionIds: institutionId })

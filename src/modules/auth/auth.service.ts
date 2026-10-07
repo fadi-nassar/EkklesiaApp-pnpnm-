@@ -5,14 +5,18 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { ConfigService } from '@nestjs/config';
 import { Document, Model, Types } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { User, UserDocument } from '../users/schema/user.schema.js';
 import { Session } from './schema/session.schema.js';
 import * as crypto from 'crypto';
 import bcrypt from 'bcryptjs';
+import { parseDurationMs } from '../../common/utils/parse-duration-ms.js';
 
 type SessionDocument = Session & Document;
+
+const DEFAULT_REFRESH_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 @Injectable()
 export class AuthService {
@@ -20,7 +24,15 @@ export class AuthService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Session.name) private sessionModel: Model<SessionDocument>,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
+
+  private refreshTtlMs(): number {
+    return parseDurationMs(
+      this.configService.get<string>('REFRESH_TTL'),
+      DEFAULT_REFRESH_TTL_MS,
+    );
+  }
 
   async login(user: UserDocument, deviceId: string) {
     const payload = { sub: user._id, role: user.role };
@@ -32,7 +44,7 @@ export class AuthService {
     const session = new this.sessionModel({
       userId: user._id,
       deviceId: deviceId,
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+      expiresAt: new Date(Date.now() + this.refreshTtlMs()),
       refreshTokenHash: crypto
         .createHash('sha256')
         .update(refreshToken)
@@ -98,7 +110,7 @@ export class AuthService {
       .createHash('sha256')
       .update(newRefreshToken)
       .digest('hex');
-    session.expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    session.expiresAt = new Date(Date.now() + this.refreshTtlMs());
     await session.save();
 
     return { accessToken: newAccessToken, refreshToken: newRefreshToken };

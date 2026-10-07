@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import {
   IsInt,
   IsOptional,
@@ -12,6 +13,7 @@ import {
 // the only fields an admin can change; everything else is rejected
 export class UpdateInstitutionDto {
   @IsOptional()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
   @Length(2, 100)
   name?: string;
@@ -23,8 +25,8 @@ export class UpdateInstitutionDto {
 
   @IsOptional()
   @IsString()
-  @Matches(/^\+?[0-9 ()-]{6,20}$/, {
-    message: 'phone must be 6 to 20 digits, spaces, brackets or dashes, with an optional leading +',
+  @Matches(/^\+?[0-9]{8,15}$/, {
+    message: 'phone must be 8 to 15 digits, with an optional leading +',
   })
   phone?: string;
 

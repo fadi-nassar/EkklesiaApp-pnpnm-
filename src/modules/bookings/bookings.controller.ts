@@ -78,6 +78,16 @@ export class BookingsController {
     return this.bookingsService.reject(institutionId, id);
   }
 
+  //for superAdmin or the institution's own churchAdmin
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Patch('institutions/:institutionId/bookings/:id/cancel')
+  async adminCancel(
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
+    @Param('id', ParseMongoIdPipe) id: string,
+  ) {
+    return this.bookingsService.adminCancel(institutionId, id);
+  }
+
   //for any authenticated user (ownership checked in the service)
   @UseGuards(JwtAuthGuard)
   @Patch('bookings/:id/cancel')
