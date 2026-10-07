@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Param,
   Patch,
   Post,
@@ -35,5 +36,14 @@ export class SalonsController {
     @Body() dto: UpdateSalonDto,
   ) {
     return this.salonsService.update(institutionId, salonId, dto);
+  }
+
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Delete(':salonId')
+  async remove(
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
+    @Param('salonId', ParseMongoIdPipe) salonId: string,
+  ): Promise<void> {
+    await this.salonsService.deleteSalon(institutionId, salonId);
   }
 }

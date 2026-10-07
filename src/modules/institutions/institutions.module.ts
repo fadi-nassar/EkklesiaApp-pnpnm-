@@ -4,6 +4,7 @@ import {
   Institution,
   InstitutionSchema,
 } from './schemas/institution.schema.js';
+import { Booking, BookingSchema } from '../bookings/schema/booking.schema.js';
 import { AdminGuard } from '../../common/guards/admin-guard.js';
 import { SuperAdminGuard } from '../../common/guards/super-admin-guard.js';
 import { InstitutionsService } from './institutions.service.js';
@@ -17,6 +18,7 @@ import { UsersModule } from '../users/users.module.js';
   imports: [
     MongooseModule.forFeature([
       { name: Institution.name, schema: InstitutionSchema },
+      { name: Booking.name, schema: BookingSchema },
     ]),
     AuthModule,
     UsersModule,
