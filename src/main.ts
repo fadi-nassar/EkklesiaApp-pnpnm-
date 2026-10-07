@@ -13,7 +13,17 @@ async function bootstrap() {
 
   app.use(helmet());
   app.use(compression());
-  app.enableCors();
+
+  const appEnv = configService.get<string>('APP_ENV');
+  if (appEnv === 'development') {
+    app.enableCors({ origin: '*' });
+  } else {
+    const origins = (configService.get<string>('CORS_ORIGINS') ?? '')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter((origin) => origin.length > 0);
+    app.enableCors({ origin: origins });
+  }
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -29,14 +39,16 @@ async function bootstrap() {
     defaultVersion: '1',
   });
 
-  const swaggerConfig = new DocumentBuilder()
-    .setTitle('EkklesiaApp API')
-    .setDescription('EkklesiaApp backend API documentation')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('docs', app, document);
+  if (appEnv !== 'production') {
+    const swaggerConfig = new DocumentBuilder()
+      .setTitle('EkklesiaApp API')
+      .setDescription('EkklesiaApp backend API documentation')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
+    SwaggerModule.setup('docs', app, document);
+  }
 
   const port = configService.get<number>('PORT') ?? 3000;
   await app.listen(port);

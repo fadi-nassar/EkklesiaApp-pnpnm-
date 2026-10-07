@@ -16,6 +16,8 @@ import { SuperAdminGuard } from '../../common/guards/super-admin-guard.js';
 import { AdminGuard } from '../../common/guards/admin-guard.js';
 import { UpdateInstitutionDto } from './dto/update-institution.dto.js';
 import { AssignAdminDto } from './dto/assign-admin.dto.js';
+import { QueryInstitutionsDto } from './dto/query-institutions.dto.js';
+import { NearbyInstitutionsDto } from './dto/nearby-institutions.dto.js';
 import { geocodeAddress } from './geocoding.util.js';
 import { ParseMongoIdPipe } from '../../common/pipes/parse-mongo-id.pipe.js';
 
@@ -33,20 +35,11 @@ export class InstitutionsController {
   //for anyone
   // must be declared before ':id', otherwise 'nearby' is captured as an id
   @Get('nearby')
-  async getNearbyInstitutions(
-    @Query()
-    query: {
-      lat: string;
-      lng: string;
-      maxDistance?: string;
-      rite?: string;
-      includeAllCountries?: string;
-    },
-  ) {
+  async getNearbyInstitutions(@Query() query: NearbyInstitutionsDto) {
     return this.institutionsService.getNearbyInstitutions(
-      Number(query.lat),
-      Number(query.lng),
-      query.maxDistance !== undefined ? Number(query.maxDistance) : undefined,
+      query.lat,
+      query.lng,
+      query.maxDistance,
       query.rite,
       query.includeAllCountries === 'true',
     );
@@ -59,7 +52,7 @@ export class InstitutionsController {
 
   @Get()
   async getAllInstitutionsByNameTypeRite(
-    @Query() query: { name?: string; type?: string; rite?: string },
+    @Query() query: QueryInstitutionsDto,
   ) {
     return this.institutionsService.getAllInstitutionsByNameTypeRite(query);
   }

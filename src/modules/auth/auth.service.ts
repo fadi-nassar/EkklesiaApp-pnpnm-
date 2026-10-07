@@ -119,7 +119,7 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<UserDocument | null> {
-    const user = await this.userModel.findOne({ email });
+    const user = await this.userModel.findOne({ email }).select('+passwordHash');
     if (!user) {
       return null;
     }
@@ -138,7 +138,7 @@ export class AuthService {
     currentPassword: string,
     newPassword: string,
   ) {
-    const user = await this.userModel.findById(userId);
+    const user = await this.userModel.findById(userId).select('+passwordHash');
     if (!user) {
       throw new UnauthorizedException('User not found');
     }

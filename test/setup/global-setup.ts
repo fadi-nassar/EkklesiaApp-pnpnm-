@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { execSync, spawn } from 'child_process';
 
 // Jest loads globalSetup/globalTeardown outside the normal module graph (no
@@ -5,7 +6,20 @@ import { execSync, spawn } from 'child_process';
 // instead of importing them from server-config.ts.
 const TEST_PORT = 3999;
 const TEST_BASE_URL = `http://127.0.0.1:${TEST_PORT}`;
-const TEST_MONGO_URI = 'mongodb://127.0.0.1:27017/ekklesia_test?replicaSet=rs0';
+
+// same Mongo instance/credentials as the app's own MONGO_URI (see .env),
+// pointed at a separate database so the suite never touches dev data
+function testMongoUri(): string {
+  const user = process.env.MONGO_ROOT_USERNAME;
+  const pass = process.env.MONGO_ROOT_PASSWORD;
+  if (!user || !pass) {
+    throw new Error(
+      'MONGO_ROOT_USERNAME/MONGO_ROOT_PASSWORD must be set (see .env) to run the e2e suite.',
+    );
+  }
+  return `mongodb://${encodeURIComponent(user)}:${encodeURIComponent(pass)}@127.0.0.1:27017/ekklesia_test?replicaSet=rs0&authSource=admin`;
+}
+const TEST_MONGO_URI = testMongoUri();
 
 // Nest's own packages (@nestjs/core, @nestjs/testing, ...) are published as
 // ESM-only, which Jest's CommonJS runtime cannot require() without a lot of

@@ -16,7 +16,7 @@ export class User {
   })
   email: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, select: false })
   passwordHash: string;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'Institution' })

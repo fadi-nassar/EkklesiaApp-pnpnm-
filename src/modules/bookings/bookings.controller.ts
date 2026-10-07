@@ -11,6 +11,7 @@ import {
 import { BookingsService } from './bookings.service.js';
 import { CreateBookingDto } from './dto/create-booking.dto.js';
 import { CreateFuneralBookingDto } from './dto/create-funeral-booking.dto.js';
+import { QueryBookingsDto } from './dto/query-bookings.dto.js';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { AdminGuard } from '../../common/guards/admin-guard.js';
 import { ParseMongoIdPipe } from '../../common/pipes/parse-mongo-id.pipe.js';
@@ -55,7 +56,7 @@ export class BookingsController {
   @Get('institutions/:institutionId/bookings')
   async findForInstitution(
     @Param('institutionId', ParseMongoIdPipe) institutionId: string,
-    @Query() query: { from?: string; to?: string; status?: string },
+    @Query() query: QueryBookingsDto,
   ) {
     return this.bookingsService.findForInstitution(institutionId, query);
   }

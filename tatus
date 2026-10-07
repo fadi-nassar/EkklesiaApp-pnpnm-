@@ -1,0 +1,27 @@
+warning: in the working copy of '.env.example', LF will be replaced by CRLF the next time Git touches it
+[1mdiff --git a/.env.example b/.env.example[m
+[1mindex 76d1304..610b890 100644[m
+[1m--- a/.env.example[m
+[1m+++ b/.env.example[m
+[36m@@ -1,8 +1,19 @@[m
+ APP_ENV=development[m
+ PORT=3000[m
+ [m
+[31m-MONGO_URI=mongodb://localhost:27017/ekklesia?replicaSet=rs0[m
+[31m-REDIS_URL=redis://localhost:6379[m
+[32m+[m[32m# used by docker-compose.yml to bootstrap the containers; the app itself only[m
+[32m+[m[32m# reads the full connection strings below[m
+[32m+[m[32mMONGO_ROOT_USERNAME=[m
+[32m+[m[32mMONGO_ROOT_PASSWORD=[m
+[32m+[m[32mREDIS_PASSWORD=[m
+[32m+[m
+[32m+[m[32mMONGO_URI=mongodb://<MONGO_ROOT_USERNAME>:<MONGO_ROOT_PASSWORD>@localhost:27017/ekklesia?replicaSet=rs0&authSource=admin[m
+[32m+[m[32mREDIS_URL=redis://:<REDIS_PASSWORD>@localhost:6379[m
+[32m+[m
+[32m+[m[32m# comma-separated list of allowed frontend origins; leave empty in production[m
+[32m+[m[32m# until a real frontend origin is known. Ignored (defaults to "*") when[m
+[32m+[m[32m# APP_ENV=development.[m
+[32m+[m[32mCORS_ORIGINS=[m
+ [m
+ JWT_ACCESS_SECRET=[m
+ JWT_REFRESH_SECRET=[m

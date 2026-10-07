@@ -123,7 +123,6 @@ async function main() {
 
   const createdUsers: string[] = [];
   const skippedUsers: string[] = [];
-  const credentials: { email: string; password: string }[] = [];
 
   for (const seedUser of usersToSeed) {
     const existing = await userModel.findOne({ email: seedUser.email });
@@ -142,7 +141,6 @@ async function main() {
       managedInstitutionIds: [],
     });
     createdUsers.push(seedUser.email);
-    credentials.push({ email: seedUser.email, password: seedUser.password });
   }
 
   console.log('\n--- Seed summary ---');
@@ -159,19 +157,22 @@ async function main() {
     `Users skipped (already existed): ${skippedUsers.length ? skippedUsers.join(', ') : 'none'}`,
   );
 
-  if (credentials.length) {
-    console.log('\n--- Login credentials (for newly created users only) ---');
-    for (const cred of credentials) {
-      console.log(`  email: ${cred.email}  password: ${cred.password}`);
+  if (createdUsers.length) {
+    console.log('\n--- Seeded accounts (for newly created users only) ---');
+    for (const email of createdUsers) {
+      console.log(`  email: ${email}`);
     }
   } else {
     console.log(
-      '\nNo new users created — reusing the credentials from the previous seed run:',
+      '\nNo new users created — reusing the accounts from the previous seed run:',
     );
     for (const seedUser of usersToSeed) {
-      console.log(`  email: ${seedUser.email}  password: ${seedUser.password}`);
+      console.log(`  email: ${seedUser.email}`);
     }
   }
+  console.log(
+    '\nPasswords are not printed — see the usersToSeed list in this file for the seeded (dev-only) passwords.',
+  );
   console.log('');
 
   await mongoose.disconnect();

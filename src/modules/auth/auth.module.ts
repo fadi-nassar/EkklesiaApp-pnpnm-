@@ -20,6 +20,7 @@ import { JwtStrategy } from './strategies/jwt.strategy.js';
       useFactory: (configService: ConfigService) => ({
         secret: configService.getOrThrow<string>('JWT_ACCESS_SECRET'),
         signOptions: {
+          algorithm: 'HS256',
           // @types/jsonwebtoken's expiresIn is a strict duration-string
           // literal type; env values are validated at startup instead.
           expiresIn: configService.getOrThrow<string>('ACCESS_TTL') as any,

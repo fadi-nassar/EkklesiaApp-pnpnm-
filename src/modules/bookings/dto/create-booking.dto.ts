@@ -5,6 +5,7 @@ import {
   IsMongoId,
   IsOptional,
   IsString,
+  MaxLength,
   Min,
 } from 'class-validator';
 
@@ -29,5 +30,6 @@ export class CreateBookingDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(1000)
   notes?: string;
 }

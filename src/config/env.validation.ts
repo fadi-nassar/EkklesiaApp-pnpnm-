@@ -6,6 +6,7 @@ import {
   IsOptional,
   IsString,
   Max,
+  MinLength,
   Min,
   validateSync,
 } from 'class-validator';
@@ -35,10 +36,14 @@ class EnvironmentVariables {
 
   @IsString()
   @IsNotEmpty()
+  @MinLength(32)
   JWT_ACCESS_SECRET: string;
 
+  // currently unused: refresh tokens are random bytes, hashed and stored in
+  // Mongo (see auth.service.ts), not JWTs — this secret signs nothing today
   @IsString()
   @IsNotEmpty()
+  @MinLength(32)
   JWT_REFRESH_SECRET: string;
 
   @IsString()
