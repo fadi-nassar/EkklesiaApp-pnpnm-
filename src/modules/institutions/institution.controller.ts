@@ -87,6 +87,17 @@ export class InstitutionsController {
     );
   }
 
+  //for superAdmin or the institution's own churchAdmin
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Delete(':institutionId/salons/:salonId')
+  async deleteSalon(
+    @Param('institutionId', ParseMongoIdPipe) institutionId: string,
+    @Param('salonId', ParseMongoIdPipe) salonId: string,
+  ) {
+    await this.institutionsService.deleteSalon(institutionId, salonId);
+    return { message: 'Salon deleted successfully.' };
+  }
+
   @UseGuards(JwtAuthGuard, SuperAdminGuard)
   @Delete(':id')
   async deleteInstitution(@Param('id', ParseMongoIdPipe) id: string) {

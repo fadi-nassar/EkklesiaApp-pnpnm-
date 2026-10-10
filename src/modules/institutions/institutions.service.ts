@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -16,6 +17,7 @@ import { isWithinLebanon } from './location.util.js';
 import { escapeRegex } from '../../common/utils/escape-regex.js';
 import { UpdateInstitutionDto } from './dto/update-institution.dto.js';
 import { create } from 'domain';
+import { Booking, BookingDocument } from '../bookings/schema/booking.schema.js';
 
 const TOWN_COORDINATES: Record<string, { lng: number; lat: number }> = {
   Kousba: { lng: 35.8528, lat: 34.3017 },
@@ -28,6 +30,8 @@ export class InstitutionsService {
     private readonly institutionModel: Model<InstitutionDocument>,
     @InjectModel(User.name)
     private readonly userModel: Model<UserDocument>,
+    @InjectModel(Booking.name)
+    private readonly bookingModel: Model<BookingDocument>,
   ) {}
 
   //for super admin only
@@ -247,5 +251,42 @@ export class InstitutionsService {
       .findById(institutionId)
       .select('-admins')
       .exec() as Promise<Institution>;
+  }
+
+  async deleteSalon(institutionId: string, salonId: string): Promise<void> {
+    const institution = await this.institutionModel.findById(institutionId);
+    if (!institution) {
+      throw new NotFoundException(
+        `Institution with ID ${institutionId} not found.`,
+      );
+    }
+
+    const salonObjectId = new Types.ObjectId(salonId);
+    const salon = institution.salons.find((s) =>
+      (s as any)._id.equals(salonObjectId),
+    );
+    if (!salon) {
+      throw new NotFoundException(
+        `Salon with ID ${salonId} not found in this institution.`,
+      );
+    }
+
+    // a salon with an upcoming requested or approved booking cannot be removed
+    const blockingBooking = await this.bookingModel.findOne({
+      institutionId: institution._id,
+      salonId: salonObjectId,
+      status: { $in: ['requested', 'approved'] },
+      endsAt: { $gt: new Date() },
+    });
+    if (blockingBooking) {
+      throw new ConflictException(
+        'This salon has upcoming requested or approved bookings. Cancel or reject them first.',
+      );
+    }
+
+    await this.institutionModel.updateOne(
+      { _id: institutionId },
+      { $pull: { salons: { _id: salonObjectId } } },
+    );
   }
 }
