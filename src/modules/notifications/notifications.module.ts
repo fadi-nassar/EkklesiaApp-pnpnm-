@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -13,6 +14,10 @@ import { NotificationsRemindersScheduler } from './notifications-reminders.sched
 import { NOTIFICATIONS_REMINDERS_QUEUE } from './notifications.constants.js';
 import { FollowsModule } from '../follows/follows.module.js';
 import { AuthModule } from '../auth/auth.module.js';
+
+// evaluated at import time (before ConfigModule runs), so .env is loaded above;
+// when disabled the worker and scheduler are not registered at all
+const remindersDisabled = process.env.DISABLE_REMINDERS === 'true';
 
 @Module({
   imports: [
@@ -45,8 +50,9 @@ import { AuthModule } from '../auth/auth.module.js';
   providers: [
     NotificationsService,
     NotificationsRemindersService,
-    NotificationsRemindersProcessor,
-    NotificationsRemindersScheduler,
+    ...(remindersDisabled
+      ? []
+      : [NotificationsRemindersProcessor, NotificationsRemindersScheduler]),
   ],
   exports: [NotificationsService],
 })

@@ -1,5 +1,6 @@
-import { plainToInstance } from 'class-transformer';
+import { plainToInstance, Transform } from 'class-transformer';
 import {
+  IsBoolean,
   IsEnum,
   IsInt,
   IsNotEmpty,
@@ -61,6 +62,11 @@ class EnvironmentVariables {
   @IsInt()
   @Min(1)
   OTP_TTL: number;
+
+  @Transform(({ value }) => value === true || value === 'true')
+  @IsBoolean()
+  @IsOptional()
+  DISABLE_REMINDERS?: boolean = false;
 }
 
 export function validate(
